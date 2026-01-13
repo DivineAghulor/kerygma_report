@@ -25,10 +25,65 @@
             /* Light grey background for contrast */
             color: #1F2937;
             display: flex;
+            min-height: 100vh;
+            /* Was padding: 20px; removed to let sidebar touch edges */
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 250px;
+            background-color: #4C1D95;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-brand h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar nav a {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 14px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .sidebar nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar nav a.active {
+            background-color: #6D28D9;
+            /* Lighter purple */
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- MAIN CONTENT WRAPPER --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            overflow-y: auto;
         }
 
         /* --- CONTAINER --- */
@@ -180,10 +235,43 @@
         }
 
         /* --- RESPONSIVE ADJUSTMENTS --- */
-        @media (max-width: 600px) {
+        @media (max-width: 800px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 15px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .sidebar-brand h2 {
+                margin-bottom: 0;
+                font-size: 1.2rem;
+            }
+
+            .sidebar nav {
+                display: flex;
+                gap: 10px;
+            }
+
+            .sidebar nav a {
+                margin-bottom: 0;
+                padding: 10px;
+            }
+
+            .main-content {
+                padding: 15px;
+                height: auto;
+            }
+
             .container {
                 border-radius: 0;
-                min-height: 100vh;
+                min-height: auto;
             }
 
             .row-2,
@@ -204,70 +292,84 @@
 
 <body>
 
-    <div class="container">
-        <header>
-            <h1>Kerygma Global Ministries</h1>
-            <h2>Devotion Report Portal</h2>
-        </header>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2>Kerygma</h2>
+        </div>
+        <nav>
+            <a href="index.html" class="active">Submit Report</a>
+            <a href="admin.html">Admin Panel</a>
+        </nav>
+    </aside>
 
-        <form action="#" method="POST">
+    <!-- CONTENT -->
+    <main class="main-content">
+        <div class="container">
+            <header>
+                <h1>Kerygma Global Ministries</h1>
+                <h2>Devotion Report Portal</h2>
+            </header>
 
-            <div class="form-section row-2">
-                <div>
-                    <label for="date">Date</label>
-                    <input type="date" id="date" name="date" required>
-                </div>
-                <div>
-                    <label for="coordinator">Coordinator Name</label>
-                    <input type="text" id="coordinator" name="coordinator" placeholder="e.g. John Doe" required>
-                </div>
-            </div>
+            <form action="#" method="POST">
 
-            <div class="form-section">
-                <label for="hall">Hall / Location</label>
-                <select id="hall" name="hall">
-                    <option value="" disabled selected>Select Hall...</option>
-                    <option value="daniel-hall">Daniel Hall</option>
-                    <option value="joseph-hall">Joseph Hall</option>
-                    <option value="paul-hall">Paul Hall</option>
-                    <option value="peter-hall">Peter Hall</option>
-                    <option value="john-hall">John Hall</option>
-                    <option value="ezra-hall">Ezra Hall</option>
-                    <option value="deborah-hall">Deborah Hall</option>
-                    <option value="mary-hall">Mary Hall</option>
-                    <option value="lydia-hall">Lydia Hall</option>
-                    <option value="dorcas-hall">Dorcas Hall</option>
-                </select>
-            </div>
-
-            <div class="form-section">
-                <label style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Attendance
-                    Metrics</label>
-                <div class="row-3">
-                    <div class="metric-input-wrapper">
-                        <label for="attendees">Total Attendees</label>
-                        <input type="number" id="attendees" name="attendees" placeholder="0">
+                <div class="form-section row-2">
+                    <div>
+                        <label for="date">Date</label>
+                        <input type="date" id="date" name="date" required>
                     </div>
-                    <div class="metric-input-wrapper">
-                        <label for="new_attendees">New Members</label>
-                        <input type="number" id="new_attendees" name="new_attendees" placeholder="0">
-                    </div>
-                    <div class="metric-input-wrapper">
-                        <label for="testimonies">Testimonies</label>
-                        <input type="number" id="testimonies" name="testimonies" placeholder="0">
+                    <div>
+                        <label for="coordinator">Coordinator Name</label>
+                        <input type="text" id="coordinator" name="coordinator" placeholder="e.g. John Doe" required>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-section">
-                <label for="names">Names of Attendees</label>
-                <textarea id="names" name="names"
-                    placeholder="Enter list of names here (separated by commas or new lines)..."></textarea>
-            </div>
+                <div class="form-section">
+                    <label for="hall">Hall / Location</label>
+                    <select id="hall" name="hall">
+                        <option value="" disabled selected>Select Hall...</option>
+                        <option value="daniel-hall">Daniel Hall</option>
+                        <option value="joseph-hall">Joseph Hall</option>
+                        <option value="paul-hall">Paul Hall</option>
+                        <option value="peter-hall">Peter Hall</option>
+                        <option value="john-hall">John Hall</option>
+                        <option value="ezra-hall">Ezra Hall</option>
+                        <option value="deborah-hall">Deborah Hall</option>
+                        <option value="mary-hall">Mary Hall</option>
+                        <option value="lydia-hall">Lydia Hall</option>
+                        <option value="dorcas-hall">Dorcas Hall</option>
+                    </select>
+                </div>
 
-            <button type="submit" class="btn-submit">Submit Update</button>
-        </form>
-    </div>
+                <div class="form-section">
+                    <label style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Attendance
+                        Metrics</label>
+                    <div class="row-3">
+                        <div class="metric-input-wrapper">
+                            <label for="attendees">Total Attendees</label>
+                            <input type="number" id="attendees" name="attendees" placeholder="0">
+                        </div>
+                        <div class="metric-input-wrapper">
+                            <label for="new_attendees">New Members</label>
+                            <input type="number" id="new_attendees" name="new_attendees" placeholder="0">
+                        </div>
+                        <div class="metric-input-wrapper">
+                            <label for="testimonies">Testimonies</label>
+                            <input type="number" id="testimonies" name="testimonies" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label for="names">Names of Attendees</label>
+                    <textarea id="names" name="names"
+                        placeholder="Enter list of names here (separated by commas or new lines)..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">Submit Update</button>
+            </form>
+        </div>
+    </main>
 
 
 

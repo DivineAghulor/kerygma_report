@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
@@ -29,14 +29,14 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // 1. Submit a Report
 app.post('/api/reports', async (req, res) => {
     try {
-        const { 
-            date, 
-            coordinator, 
-            hall, 
-            attendees, 
-            new_attendees, 
-            testimonies, 
-            names 
+        const {
+            date,
+            coordinator,
+            hall,
+            attendees,
+            new_attendees,
+            testimonies,
+            names
         } = req.body;
 
         // Using Supabase SDK instead of SQL
@@ -44,7 +44,7 @@ app.post('/api/reports', async (req, res) => {
         const { data, error } = await supabase
             .from('school_devotion_reports') // Your table name
             .insert([
-                { 
+                {
                     meeting_date: date,
                     coordinator: coordinator,
                     hall: hall,
@@ -58,9 +58,9 @@ app.post('/api/reports', async (req, res) => {
 
         if (error) throw error;
 
-        res.status(201).json({ 
-            message: 'Report submitted successfully!', 
-            data: data[0] 
+        res.status(201).json({
+            message: 'Report submitted successfully!',
+            data: data[0]
         });
 
     } catch (err) {
@@ -69,13 +69,54 @@ app.post('/api/reports', async (req, res) => {
     }
 });
 
-// 2. View All Reports
+// 2. Login Endpoint (Simple Auth)
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    const adminUser = process.env.ADMIN_USER;
+    const adminPass = process.env.ADMIN_PASS;
+
+    if (!adminUser || !adminPass) {
+        console.error("❌ Admin credentials not set in environment.");
+        return res.status(500).json({ error: "Server misconfiguration" });
+    }
+
+    if (username === adminUser && password === adminPass) {
+        // In a real app, generate a JWT. Here we use a simple secret token.
+        return res.json({ success: true, token: 'kerygma-secret-admin-token' });
+    } else {
+        return res.status(401).json({ error: "Invalid credentials" });
+    }
+});
+
+// 3. View All Reports (Protected & Filterable)
 app.get('/api/reports', async (req, res) => {
     try {
-        const { data, error } = await supabase
-            .from('kerygma_reports')
+        // --- SECURITY CHECK ---
+        const token = req.headers['x-admin-token'];
+        if (token !== 'kerygma-secret-admin-token') {
+            return res.status(401).json({ error: "Unauthorized access" });
+        }
+
+        // --- FILTERING PARAMS ---
+        const { start_date, end_date, hall } = req.query;
+
+        let query = supabase
+            .from('school_devotion_reports') // Changed from kerygma_reports to match the POST route (assuming consistent table name is desired, or user can correct)
             .select('*')
             .order('meeting_date', { ascending: false });
+
+        if (start_date) {
+            query = query.gte('meeting_date', start_date);
+        }
+        if (end_date) {
+            query = query.lte('meeting_date', end_date);
+        }
+        if (hall) {
+            query = query.eq('hall', hall);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 

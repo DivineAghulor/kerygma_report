@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerygma Global - Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* --- RESET & BASIC --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #F3F4F6;
+            color: #1F2937;
+            min-height: 100vh;
+        }
+
+        /* --- UTILITIES --- */
+        .hidden {
+            display: none !important;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: #4C1D95;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3B0F75;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #4C1D95;
+            color: #4C1D95;
+        }
+
+        .btn-outline:hover {
+            background-color: #EDE9FE;
+        }
+
+        /* --- LOGIN VIEW --- */
+        #login-view {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #4C1D95;
+            /* Royal Purple Background */
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .login-card h1 {
+            font-family: 'Poppins', sans-serif;
+            color: #4C1D95;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .login-card input:focus {
+            border-color: #6D28D9;
+            outline: none;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+
+        /* --- SIDEBAR (Shared Styles) --- */
+        .sidebar {
+            width: 250px;
+            background-color: #4C1D95;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar nav a {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 14px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .sidebar nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar nav a.active {
+            background-color: #6D28D9;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- DASHBOARD VIEW UPDATED --- */
+        #dashboard-view {
+            /* Now it's a wrapper for the flex container */
+            height: 100vh;
+            display: flex;
+            /* This makes the inner wrapper take full height */
+            flex-direction: column;
+        }
+
+        .dashboard-layout {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        .dashboard-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Top Bar Adjustment */
+        .top-bar {
+            background: #fff;
+            padding: 15px 30px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* Filters Bar */
+        .controls-bar {
+            padding: 20px 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .controls-bar select,
+        .controls-bar input {
+            padding: 10px 15px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        /* Scorecards */
+        .scorecards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 0 30px 30px 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #6D28D9;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #6B7280;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .stat-card.highlight .number {
+            color: #6D28D9;
+            /* Highlight color for souls won */
+        }
+
+        /* Data Table */
+        .table-container {
+            flex-grow: 1;
+            padding: 0 30px 50px 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            /* Space between rows */
+        }
+
+        th {
+            text-align: left;
+            padding: 0 20px;
+            color: #6B7280;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        tr.report-row {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: transform 0.1s ease;
+            cursor: pointer;
+        }
+
+        tr.report-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        td:first-child {
+            border-left: 1px solid #eee;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        td:last-child {
+            border-right: 1px solid #eee;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            background: #EDE9FE;
+            color: #6D28D9;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Expanded Details */
+        tr.details-row {
+            display: none;
+            background-color: #F9FAFB;
+        }
+
+        tr.details-row.open {
+            display: table-row;
+        }
+
+        .details-content {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-top: none;
+            margin-top: -10px;
+            /* Connect to row above */
+            border-radius: 0 0 10px 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOGIN VIEW -->
+    <div id="login-view">
+        <div class="login-card">
+            <h1>Admin Panel</h1>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button id="login-btn" class="btn btn-primary">Login</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="hidden">
+        <div class="dashboard-layout">
+            <!-- SIDEBAR -->
+            <aside class="sidebar">
+                <div class="sidebar-brand">
+                    <h2>Kerygma</h2>
+                </div>
+                <nav>
+                    <a href="index.html">Submit Report</a>
+                    <a href="admin.html" class="active">Admin Panel</a>
+                </nav>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="dashboard-main">
+
+                <!-- Header -->
+                <div class="top-bar">
+                    <div class="brand">
+                        <h2>Analytics Dashboard</h2>
+                    </div>
+                    <button id="logout-btn" class="btn btn-outline">Logout</button>
+                </div>
+
+                <!-- Filters -->
+                <div class="controls-bar">
+                    <select id="date-range">
+                        <option value="today">Today</option>
+                        <option value="this-week">This Week</option>
+                        <option value="this-month">This Month</option>
+                        <option value="all-time" selected>All Time</option>
+                    </select>
+
+                    <select id="hall-filter">
+                        <option value="">All Halls</option>
+                        <option value="daniel-hall">Daniel Hall</option>
+                        <option value="joseph-hall">Joseph Hall</option>
+                        <option value="paul-hall">Paul Hall</option>
+                        <option value="peter-hall">Peter Hall</option>
+                        <option value="john-hall">John Hall</option>
+                        <option value="ezra-hall">Ezra Hall</option>
+                        <option value="deborah-hall">Deborah Hall</option>
+                        <option value="mary-hall">Mary Hall</option>
+                        <option value="lydia-hall">Lydia Hall</option>
+                        <option value="dorcas-hall">Dorcas Hall</option>
+                    </select>
+
+                    <button id="export-btn" class="btn btn-primary" style="margin-left: auto;">Export CSV</button>
+                </div>
+
+                <!-- Scorecards -->
+                <div class="scorecards-container">
+                    <div class="stat-card">
+                        <h3>Total Attendance</h3>
+                        <div class="number" id="total-attendance">0</div>
+                    </div>
+                    <div class="stat-card highlight">
+                        <h3>New Souls Won</h3>
+                        <div class="number" id="total-new-souls">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Testimonies</h3>
+                        <div class="number" id="total-testimonies">0</div>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Coordinator</th>
+                                <th>Hall</th>
+                                <th>Attendance</th>
+                                <th>New</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table-body">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>
