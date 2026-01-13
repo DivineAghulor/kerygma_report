@@ -1,35 +1,32 @@
 import express from 'express';
 import cors from 'cors';
-import pg from 'pg';
 import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
-app.use(express.json()); // Parses JSON bodies
+app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
+app.use(express.json());
 
-// Database Configuration
-const { Pool } = pg;
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT || 5432,
-});
+// --- SUPABASE CONFIGURATION ---
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 
-// Test DB Connection
-pool.connect()
-    .then(() => console.log('✅ Connected to PostgreSQL database'))
-    .catch(err => console.error('❌ Database connection error', err.stack));
+if (!supabaseUrl || !supabaseKey) {
+    console.error("❌ Missing Supabase URL or Key in environment variables.");
+    process.exit(1);
+}
 
-// ROUTES
+// Initialize the client
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// 1. Submit a Report (POST)
+// --- ROUTES ---
+
+// 1. Submit a Report
 app.post('/api/reports', async (req, res) => {
     try {
         const { 
@@ -42,39 +39,53 @@ app.post('/api/reports', async (req, res) => {
             names 
         } = req.body;
 
-        const query = `
-            INSERT INTO reports 
-            (meeting_date, coordinator, hall, total_attendees, new_attendees, testimonies, attendee_names)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING *;
-        `;
+        // Using Supabase SDK instead of SQL
+        // Make sure your table columns match these keys EXACTLY
+        const { data, error } = await supabase
+            .from('school_devotion_reports') // Your table name
+            .insert([
+                { 
+                    meeting_date: date,
+                    coordinator: coordinator,
+                    hall: hall,
+                    total_attendees: attendees,
+                    new_attendees: new_attendees,
+                    testimonies: testimonies,
+                    attendee_names: names
+                }
+            ])
+            .select(); // Returns the inserted data
 
-        const values = [date, coordinator, hall, attendees, new_attendees, testimonies, names];
-        
-        const result = await pool.query(query, values);
-        
+        if (error) throw error;
+
         res.status(201).json({ 
             message: 'Report submitted successfully!', 
-            data: result.rows[0] 
+            data: data[0] 
         });
 
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Supabase Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 
-// 2. View All Reports (GET) - Optional, for checking data
+// 2. View All Reports
 app.get('/api/reports', async (req, res) => {
     try {
-        const allReports = await pool.query('SELECT * FROM reports ORDER BY meeting_date DESC');
-        res.json(allReports.rows);
+        const { data, error } = await supabase
+            .from('kerygma_reports')
+            .select('*')
+            .order('meeting_date', { ascending: false });
+
+        if (error) throw error;
+
+        res.json(data);
     } catch (err) {
-        console.error(err.message);
+        console.error('Supabase Error:', err.message);
         res.status(500).send('Server Error');
     }
 });
 
 app.listen(port, () => {
-    console.log(`🚀 Server running on http://localhost:${port}`);
+    console.log(`🚀 Server running on port ${port}`);
 });
